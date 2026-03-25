@@ -7,7 +7,7 @@ or something more verbose that includes things like CPU target feature support.
 
 use std::fmt::Write;
 
-/// Generates just the numerical part of the version of ripgrep.
+/// Generates just the numerical part of the version of gitgrep.
 ///
 /// This includes the git revision hash.
 pub(crate) fn generate_digits() -> String {
@@ -18,15 +18,15 @@ pub(crate) fn generate_digits() -> String {
     }
 }
 
-/// Generates a short version string of the form `ripgrep x.y.z`.
+/// Generates a short version string of the form `gitgrep x.y.z`.
 pub(crate) fn generate_short() -> String {
     let digits = generate_digits();
-    format!("ripgrep {digits}")
+    format!("gitgrep {digits}")
 }
 
 /// Generates a longer multi-line version string.
 ///
-/// This includes not only the version of ripgrep but some other information
+/// This includes not only the version of gitgrep but some other information
 /// about its build. For example, SIMD support and PCRE2 support.
 pub(crate) fn generate_long() -> String {
     let (compile, runtime) = (compile_cpu_features(), runtime_cpu_features());
@@ -49,7 +49,7 @@ pub(crate) fn generate_long() -> String {
 /// Generates multi-line version string with PCRE2 information.
 ///
 /// This also returns whether PCRE2 is actually available in this build of
-/// ripgrep.
+/// gitgrep.
 pub(crate) fn generate_pcre2() -> (String, bool) {
     let mut out = String::new();
 
@@ -69,7 +69,7 @@ pub(crate) fn generate_pcre2() -> (String, bool) {
 
     #[cfg(not(feature = "pcre2"))]
     {
-        writeln!(out, "PCRE2 is not available in this build of ripgrep.")
+        writeln!(out, "PCRE2 is not available in this build of gitgrep.")
             .unwrap();
         (out, false)
     }
@@ -115,9 +115,9 @@ fn runtime_cpu_features() -> Vec<String> {
     }
 }
 
-/// Returns the SIMD features supported while compiling ripgrep.
+/// Returns the SIMD features supported while compiling gitgrep.
 ///
-/// In essence, any features listed here are required to run ripgrep correctly.
+/// In essence, any features listed here are required to run gitgrep correctly.
 ///
 /// This is kind of a dirty violation of abstraction, since it assumes
 /// knowledge about what specific SIMD features are being used by various
@@ -157,7 +157,7 @@ fn compile_cpu_features() -> Vec<String> {
     }
 }
 
-/// Returns a list of "features" supported (or not) by this build of ripgrpe.
+/// Returns a list of "features" supported (or not) by this build of gitgrep.
 fn features() -> Vec<String> {
     let mut features = vec![];
 

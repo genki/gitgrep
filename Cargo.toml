@@ -3,16 +3,17 @@ name = "ripgrep"
 version = "15.1.0"  #:version
 authors = ["Andrew Gallant <jamslam@gmail.com>"]
 description = """
-ripgrep is a line-oriented search tool that recursively searches the current
-directory for a regex pattern while respecting gitignore rules. ripgrep has
-first class support on Windows, macOS and Linux.
+gitgrep is a line-oriented search tool that recursively searches the current
+directory for a regex pattern while respecting gitignore rules. In Git
+repositories, matching lines are prefixed with their last edit time as a UNIX
+timestamp.
 """
-documentation = "https://github.com/BurntSushi/ripgrep"
-homepage = "https://github.com/BurntSushi/ripgrep"
-repository = "https://github.com/BurntSushi/ripgrep"
+documentation = "https://github.com/genki/gitgrep"
+homepage = "https://github.com/genki/gitgrep"
+repository = "https://github.com/genki/gitgrep"
 keywords = ["regex", "grep", "egrep", "search", "pattern"]
 categories = ["command-line-utilities", "text-processing"]
-license = "Unlicense OR MIT"
+license = "Unlicense"
 exclude = [
   "HomebrewFormula",
   "/.github/",
@@ -95,7 +96,6 @@ section = "utils"
 assets = [
   ["target/release/gg", "usr/bin/", "755"],
   ["COPYING", "usr/share/doc/ripgrep/", "644"],
-  ["LICENSE-MIT", "usr/share/doc/ripgrep/", "644"],
   ["UNLICENSE", "usr/share/doc/ripgrep/", "644"],
   ["CHANGELOG.md", "usr/share/doc/ripgrep/CHANGELOG", "644"],
   ["README.md", "usr/share/doc/ripgrep/README", "644"],
@@ -111,7 +111,7 @@ assets = [
   ["deployment/deb/_gg", "usr/share/zsh/vendor-completions/", "644"],
 ]
 extended-description = """\
-ripgrep (gg) recursively searches your current directory for a regex pattern.
-By default, ripgrep will respect your .gitignore and automatically skip hidden
-files/directories and binary files.
+gitgrep (gg) recursively searches your current directory for a regex pattern.
+Inside Git repositories, matching lines are prefixed with the last edit time
+reported by git blame as a UNIX timestamp.
 """

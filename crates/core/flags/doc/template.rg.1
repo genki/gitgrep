@@ -1,4 +1,4 @@
-.TH RG 1 2025-10-22 "!!VERSION!!" "User Commands"
+.TH GG 1 2025-10-22 "!!VERSION!!" "User Commands"
 .
 .
 .SH NAME
@@ -10,66 +10,67 @@ gg \- recursively search the current directory for lines matching a pattern
 .\" looks like they aren't portable. Specifically, they don't appear to be in
 .\" BSD's mdoc used on macOS.
 .sp
-\fBrg\fP [\fIOPTIONS\fP] \fIPATTERN\fP [\fIPATH\fP...]
+\fBgg\fP [\fIOPTIONS\fP] \fIPATTERN\fP [\fIPATH\fP...]
 .sp
-\fBrg\fP [\fIOPTIONS\fP] \fB\-e\fP \fIPATTERN\fP... [\fIPATH\fP...]
+\fBgg\fP [\fIOPTIONS\fP] \fB\-e\fP \fIPATTERN\fP... [\fIPATH\fP...]
 .sp
-\fBrg\fP [\fIOPTIONS\fP] \fB\-f\fP \fIPATTERNFILE\fP... [\fIPATH\fP...]
+\fBgg\fP [\fIOPTIONS\fP] \fB\-f\fP \fIPATTERNFILE\fP... [\fIPATH\fP...]
 .sp
-\fBrg\fP [\fIOPTIONS\fP] \fB\-\-files\fP [\fIPATH\fP...]
+\fBgg\fP [\fIOPTIONS\fP] \fB\-\-files\fP [\fIPATH\fP...]
 .sp
-\fBrg\fP [\fIOPTIONS\fP] \fB\-\-type\-list\fP
+\fBgg\fP [\fIOPTIONS\fP] \fB\-\-type\-list\fP
 .sp
-\fIcommand\fP | \fBrg\fP [\fIOPTIONS\fP] \fIPATTERN\fP
+\fIcommand\fP | \fBgg\fP [\fIOPTIONS\fP] \fIPATTERN\fP
 .sp
-\fBrg\fP [\fIOPTIONS\fP] \fB\-\-help\fP
+\fBgg\fP [\fIOPTIONS\fP] \fB\-\-help\fP
 .sp
-\fBrg\fP [\fIOPTIONS\fP] \fB\-\-version\fP
+\fBgg\fP [\fIOPTIONS\fP] \fB\-\-version\fP
 .
 .
 .SH DESCRIPTION
-ripgrep (gg) recursively searches the current directory for a regex pattern.
-By default, ripgrep will respect your \fB.gitignore\fP and automatically skip
-hidden files/directories and binary files.
+gitgrep (gg) recursively searches the current directory for a regex pattern.
+Inside Git repositories, matching lines are prefixed with the last edit time
+reported by git blame as a UNIX timestamp. gitgrep also respects your
+\fB.gitignore\fP and automatically skips hidden files/directories and binary files.
 .sp
-ripgrep's default regex engine uses finite automata and guarantees linear
+gitgrep's default regex engine uses finite automata and guarantees linear
 time searching. Because of this, features like backreferences and arbitrary
-look-around are not supported. However, if ripgrep is built with PCRE2,
+look-around are not supported. However, if gitgrep is built with PCRE2,
 then the \fB\-P/\-\-pcre2\fP flag can be used to enable backreferences and
 look-around.
 .sp
-ripgrep supports configuration files. Set \fBRIPGREP_CONFIG_PATH\fP to a
+gitgrep supports configuration files. Set \fBRIPGREP_CONFIG_PATH\fP to a
 configuration file. The file can specify one shell argument per line. Lines
 starting with \fB#\fP are ignored. For more details, see \fBCONFIGURATION
 FILES\fP below.
 .sp
-ripgrep will automatically detect if stdin is a readable file and search stdin
+gitgrep will automatically detect if stdin is a readable file and search stdin
 for a regex pattern, e.g. \fBls | gg foo\fP. In some environments, stdin may
 exist when it shouldn't. To turn off stdin detection, one can explicitly
-specify the directory to search, e.g. \fBrg foo ./\fP.
+specify the directory to search, e.g. \fBgg foo ./\fP.
 .sp
-Like other tools such as \fBls\fP, ripgrep will alter its output depending on
-whether stdout is connected to a tty. By default, when printing a tty, ripgrep
+Like other tools such as \fBls\fP, gitgrep will alter its output depending on
+whether stdout is connected to a tty. By default, when printing a tty, gitgrep
 will enable colors, line numbers and a heading format that lists each matching
 file path once instead of once per matching line.
 .sp
-Tip: to disable all smart filtering and make ripgrep behave a bit more like
-classical grep, use \fBrg -uuu\fP.
+Tip: to disable all smart filtering and make gitgrep behave a bit more like
+classical grep, use \fBgg -uuu\fP.
 .
 .
 .SH REGEX SYNTAX
-ripgrep uses Rust's regex engine by default, which documents its syntax:
+gitgrep uses Rust's regex engine by default, which documents its syntax:
 \fIhttps://docs.rs/regex/1.*/regex/#syntax\fP
 .sp
-ripgrep uses byte-oriented regexes, which has some additional documentation:
+gitgrep uses byte-oriented regexes, which has some additional documentation:
 \fIhttps://docs.rs/regex/1.*/regex/bytes/index.html#syntax\fP
 .sp
-To a first approximation, ripgrep uses Perl-like regexes without look-around or
+To a first approximation, gitgrep uses Perl-like regexes without look-around or
 backreferences. This makes them very similar to the "extended" (ERE) regular
 expressions supported by *egrep*, but with a few additional features like
 Unicode character classes.
 .sp
-If you're using ripgrep with the \fB\-P/\-\-pcre2\fP flag, then please consult
+If you're using gitgrep with the \fB\-P/\-\-pcre2\fP flag, then please consult
 \fIhttps://www.pcre.org\fP or the PCRE2 man pages for documentation on the
 supported syntax.
 .
@@ -407,7 +408,7 @@ system will generally handle this for you.
 .
 .
 .SH HOMEPAGE
-\fIhttps://github.com/BurntSushi/ripgrep\fP
+\fIhttps://github.com/genki/gitgrep\fP
 .sp
 Please report bugs and feature requests to the issue tracker. Please do your
 best to provide a reproducible test case for bugs. This should include the
@@ -417,8 +418,8 @@ with the \fB\-\-debug\fP flag.
 .sp
 If you have questions that don't obviously fall into the "bug" or "feature
 request" category, then they are welcome in the Discussions section of the
-issue tracker: \fIhttps://github.com/BurntSushi/ripgrep/discussions\fP.
+issue tracker: \fIhttps://github.com/genki/gitgrep/issues\fP.
 .
 .
 .SH AUTHORS
-Andrew Gallant <\fIjamslam@gmail.com\fP>
+genki

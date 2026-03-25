@@ -7,7 +7,7 @@ fn main() {
 ///
 /// The main reason for this is to enable long path support on Windows. This
 /// still, I believe, requires enabling long path support in the registry. But
-/// if that's enabled, then this will let ripgrep use C:\... style paths that
+/// if that's enabled, then this will let gitgrep use C:\... style paths that
 /// are longer than 260 characters.
 fn set_windows_exe_options() {
     static MANIFEST: &str = "pkg/windows/Manifest.xml";
@@ -24,11 +24,11 @@ fn set_windows_exe_options() {
 
     println!("cargo:rerun-if-changed={MANIFEST}");
     // Embed the Windows application manifest file.
-    println!("cargo:rustc-link-arg-bin=rg=/MANIFEST:EMBED");
-    println!("cargo:rustc-link-arg-bin=rg=/MANIFESTINPUT:{manifest}");
+    println!("cargo:rustc-link-arg-bin=gg=/MANIFEST:EMBED");
+    println!("cargo:rustc-link-arg-bin=gg=/MANIFESTINPUT:{manifest}");
     // Turn linker warnings into errors. Helps debugging, otherwise the
     // warnings get squashed (I believe).
-    println!("cargo:rustc-link-arg-bin=rg=/WX");
+    println!("cargo:rustc-link-arg-bin=gg=/WX");
 }
 
 /// Make the current git hash available to the build as the environment
