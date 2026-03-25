@@ -1,4 +1,6 @@
+use std::fs;
 use std::process::Command;
+use std::time::UNIX_EPOCH;
 
 use crate::hay::{SHERLOCK, SHERLOCK_CRLF};
 use crate::util::{Dir, TestCommand, sort_lines};
@@ -1223,3 +1225,29 @@ rgtest!(git_line_timestamp_prefix, |dir: Dir, mut cmd: TestCommand| {
     cmd.arg("updated");
     eqnice!("1706843045:tracked.txt:beta updated\n", cmd.stdout());
 });
+
+rgtest!(
+    git_line_timestamp_uncommitted_uses_mtime,
+    |dir: Dir, mut cmd: TestCommand| {
+        git_ok(&dir, &["init"]);
+        git_ok(&dir, &["config", "user.name", "ripgrep tests"]);
+        git_ok(&dir, &["config", "user.email", "ripgrep@example.com"]);
+
+        dir.create("tracked.txt", "alpha\nbeta\n");
+        git_ok(&dir, &["add", "tracked.txt"]);
+        git_commit(&dir, "initial", "2024-02-01T00:00:00Z");
+
+        dir.create("tracked.txt", "alpha\nbeta modified\n");
+        let mtime = fs::metadata(dir.path().join("tracked.txt"))
+            .unwrap()
+            .modified()
+            .unwrap()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+
+        cmd.arg("modified").arg(".");
+        let stdout = cmd.stdout();
+        assert_eq!(format!("{mtime}:./tracked.txt:beta modified\n"), stdout);
+    }
+);

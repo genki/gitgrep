@@ -9,9 +9,10 @@ search worker is where things like preprocessors or decompression happens.
 
 use std::{
     collections::HashMap,
-    io,
+    fs, io,
     path::{Path, PathBuf},
     sync::Arc,
+    time::UNIX_EPOCH,
 };
 
 use {grep::matcher::Matcher, termcolor::WriteColor};
@@ -464,6 +465,7 @@ fn git_blame_timestamps(
     repo_root: &Path,
     repo_relative_path: &Path,
 ) -> Option<Vec<u64>> {
+    let file_mtime = file_mtime(repo_root.join(repo_relative_path).as_path());
     let output = std::process::Command::new(git_bin)
         .arg("-C")
         .arg(repo_root)
@@ -476,16 +478,32 @@ fn git_blame_timestamps(
     }
 
     let stdout = String::from_utf8(output.stdout).ok()?;
+    let mut current_is_uncommitted = false;
     let mut current_timestamp = None;
     let mut line_timestamps = vec![];
     for line in stdout.lines() {
+        if let Some(object_id) = line.split_whitespace().next() {
+            current_is_uncommitted =
+                object_id == "0000000000000000000000000000000000000000";
+        }
         if let Some(timestamp) = line.strip_prefix("author-time ") {
             current_timestamp = timestamp.parse::<u64>().ok();
         } else if line.starts_with('\t') {
-            line_timestamps.push(current_timestamp?);
+            let timestamp = if current_is_uncommitted {
+                file_mtime?
+            } else {
+                current_timestamp?
+            };
+            line_timestamps.push(timestamp);
         }
     }
     if line_timestamps.is_empty() { None } else { Some(line_timestamps) }
+}
+
+fn file_mtime(path: &Path) -> Option<u64> {
+    let modified = fs::metadata(path).ok()?.modified().ok()?;
+    let duration = modified.duration_since(UNIX_EPOCH).ok()?;
+    Some(duration.as_secs())
 }
 
 /// Search the contents of the given file path using the given matcher,
