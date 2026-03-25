@@ -1,5 +1,39 @@
+use std::process::Command;
+
 use crate::hay::{SHERLOCK, SHERLOCK_CRLF};
 use crate::util::{Dir, TestCommand, sort_lines};
+
+fn git(dir: &Dir) -> Command {
+    let mut cmd = Command::new("git");
+    cmd.current_dir(dir.path());
+    cmd
+}
+
+fn git_ok(dir: &Dir, args: &[&str]) {
+    let output = git(dir).args(args).output().unwrap();
+    assert!(
+        output.status.success(),
+        "git {:?} failed\nstdout: {}\nstderr: {}",
+        args,
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr),
+    );
+}
+
+fn git_commit(dir: &Dir, message: &str, when: &str) {
+    let output = git(dir)
+        .args(["commit", "-m", message, "--no-gpg-sign"])
+        .env("GIT_AUTHOR_DATE", when)
+        .env("GIT_COMMITTER_DATE", when)
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "git commit failed\nstdout: {}\nstderr: {}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr),
+    );
+}
 
 // See: https://github.com/BurntSushi/ripgrep/issues/1
 rgtest!(f1_sjis, |dir: Dir, mut cmd: TestCommand| {
@@ -975,7 +1009,7 @@ rgtest!(f1404_nothing_searched_warning, |dir: Dir, mut cmd: TestCommand| {
     let output = cmd.raw_output();
     let stderr = String::from_utf8_lossy(&output.stderr);
     let expected = "\
-        rg: No files were searched, which means ripgrep probably applied \
+        gg: No files were searched, which means ripgrep probably applied \
         a filter you didn't expect.\n\
         Running with --debug will show why files are being skipped.\n\
     ";
@@ -1171,4 +1205,21 @@ rgtest!(stop_on_nonmatch, |dir: Dir, mut cmd: TestCommand| {
     dir.create("test", "line1\nline2\nline3\nline4\nline5");
     cmd.args(&["--stop-on-nonmatch", "[235]"]);
     eqnice!("test:line2\ntest:line3\n", cmd.stdout());
+});
+
+rgtest!(git_line_timestamp_prefix, |dir: Dir, mut cmd: TestCommand| {
+    git_ok(&dir, &["init"]);
+    git_ok(&dir, &["config", "user.name", "ripgrep tests"]);
+    git_ok(&dir, &["config", "user.email", "ripgrep@example.com"]);
+
+    dir.create("tracked.txt", "alpha\nbeta\n");
+    git_ok(&dir, &["add", "tracked.txt"]);
+    git_commit(&dir, "initial", "2024-02-01T00:00:00Z");
+
+    dir.create("tracked.txt", "alpha\nbeta updated\n");
+    git_ok(&dir, &["add", "tracked.txt"]);
+    git_commit(&dir, "update", "2024-02-02T03:04:05Z");
+
+    cmd.arg("updated");
+    eqnice!("1706843045:tracked.txt:beta updated\n", cmd.stdout());
 });

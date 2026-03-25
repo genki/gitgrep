@@ -5,7 +5,7 @@ Provides completions for ripgrep's CLI for the bash shell.
 use crate::flags::defs::FLAGS;
 
 const TEMPLATE_FULL: &'static str = "
-_rg() {
+_gg() {
   local i cur prev opts cmds
   COMPREPLY=()
   cur=\"${COMP_WORDS[COMP_CWORD]}\"
@@ -15,8 +15,8 @@ _rg() {
 
   for i in ${COMP_WORDS[@]}; do
     case \"${i}\" in
-      rg)
-        cmd=\"rg\"
+      gg)
+        cmd=\"gg\"
         ;;
       *)
         ;;
@@ -24,7 +24,7 @@ _rg() {
   done
 
   case \"${cmd}\" in
-    rg)
+    gg)
       opts=\"!OPTS!\"
       if [[ ${cur} == -* || ${COMP_CWORD} -eq 1 ]] ; then
         COMPREPLY=($(compgen -W \"${opts}\" -- \"${cur}\"))
@@ -39,7 +39,7 @@ _rg() {
   esac
 }
 
-complete -F _rg -o bashdefault -o default rg
+complete -F _gg -o bashdefault -o default gg
 ";
 
 const TEMPLATE_CASE: &'static str = "

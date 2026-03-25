@@ -30,7 +30,7 @@ rust-version = "1.85"
 [[bin]]
 bench = false
 path = "crates/core/main.rs"
-name = "rg"
+name = "gg"
 
 [[test]]
 name = "integration"
@@ -93,7 +93,7 @@ inherits = "release-lto"
 features = ["pcre2"]
 section = "utils"
 assets = [
-  ["target/release/rg", "usr/bin/", "755"],
+  ["target/release/gg", "usr/bin/", "755"],
   ["COPYING", "usr/share/doc/ripgrep/", "644"],
   ["LICENSE-MIT", "usr/share/doc/ripgrep/", "644"],
   ["UNLICENSE", "usr/share/doc/ripgrep/", "644"],
@@ -104,14 +104,14 @@ assets = [
   # this file isn't actually committed. Instead, to create a dpkg, either
   # create a deployment/deb directory and copy the man page to it, or use the
   # 'ci/build-deb' script.
-  ["deployment/deb/rg.1", "usr/share/man/man1/rg.1", "644"],
+  ["deployment/deb/gg.1", "usr/share/man/man1/gg.1", "644"],
   # Similarly for shell completions.
-  ["deployment/deb/rg.bash", "usr/share/bash-completion/completions/rg", "644"],
-  ["deployment/deb/rg.fish", "usr/share/fish/vendor_completions.d/rg.fish", "644"],
-  ["deployment/deb/_rg", "usr/share/zsh/vendor-completions/", "644"],
+  ["deployment/deb/gg.bash", "usr/share/bash-completion/completions/gg", "644"],
+  ["deployment/deb/gg.fish", "usr/share/fish/vendor_completions.d/gg.fish", "644"],
+  ["deployment/deb/_gg", "usr/share/zsh/vendor-completions/", "644"],
 ]
 extended-description = """\
-ripgrep (rg) recursively searches your current directory for a regex pattern.
+ripgrep (gg) recursively searches your current directory for a regex pattern.
 By default, ripgrep will respect your .gitignore and automatically skip hidden
 files/directories and binary files.
 """

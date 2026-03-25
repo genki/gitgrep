@@ -8,11 +8,11 @@ const TEMPLATE: &'static str = "
 using namespace System.Management.Automation
 using namespace System.Management.Automation.Language
 
-Register-ArgumentCompleter -Native -CommandName 'rg' -ScriptBlock {
+Register-ArgumentCompleter -Native -CommandName 'gg' -ScriptBlock {
   param($wordToComplete, $commandAst, $cursorPosition)
   $commandElements = $commandAst.CommandElements
   $command = @(
-    'rg'
+    'gg'
     for ($i = 1; $i -lt $commandElements.Count; $i++) {
         $element = $commandElements[$i]
         if ($element -isnot [StringConstantExpressionAst] -or
@@ -24,7 +24,7 @@ Register-ArgumentCompleter -Native -CommandName 'rg' -ScriptBlock {
   }) -join ';'
 
   $completions = @(switch ($command) {
-    'rg' {
+    'gg' {
 !FLAGS!
     }
   })

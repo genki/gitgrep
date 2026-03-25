@@ -1,7 +1,7 @@
 ripgrep !!VERSION!!
 Andrew Gallant <jamslam@gmail.com>
 
-ripgrep (rg) recursively searches the current directory for lines matching
+ripgrep (gg) recursively searches the current directory for lines matching
 a regex pattern. By default, ripgrep will respect gitignore rules and
 automatically skip hidden files/directories and binary files.
 
@@ -10,14 +10,14 @@ Use -h for short descriptions and --help for more details.
 Project home page: https://github.com/BurntSushi/ripgrep
 
 USAGE:
-    rg [OPTIONS] PATTERN [PATH ...]
-    rg [OPTIONS] -e PATTERN ... [PATH ...]
-    rg [OPTIONS] -f PATTERNFILE ... [PATH ...]
-    rg [OPTIONS] --files [PATH ...]
-    rg [OPTIONS] --type-list
-    command | rg [OPTIONS] PATTERN
-    rg [OPTIONS] --help
-    rg [OPTIONS] --version
+    gg [OPTIONS] PATTERN [PATH ...]
+    gg [OPTIONS] -e PATTERN ... [PATH ...]
+    gg [OPTIONS] -f PATTERNFILE ... [PATH ...]
+    gg [OPTIONS] --files [PATH ...]
+    gg [OPTIONS] --type-list
+    command | gg [OPTIONS] PATTERN
+    gg [OPTIONS] --help
+    gg [OPTIONS] --version
 
 POSITIONAL ARGUMENTS:
     <PATTERN>
@@ -26,13 +26,13 @@ POSITIONAL ARGUMENTS:
 
         For example, to search for the literal '-foo', you can use this flag:
 
-            rg -e -foo
+            gg -e -foo
 
         You can also use the special '--' delimiter to indicate that no more
         flags will be provided. Namely, the following is equivalent to the
         above:
 
-            rg -- -foo
+            gg -- -foo
 
     <PATH>...
         A file or directory to search. Directories are searched recursively.

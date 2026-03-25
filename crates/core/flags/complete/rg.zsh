@@ -1,10 +1,10 @@
-#compdef rg
+#compdef gg
 
 ##
 # zsh completion function for ripgrep
 #
 # Run ci/test-complete after building to ensure that the options supported by
-# this function stay in synch with the `rg` binary.
+# this function stay in synch with the `gg` binary.
 #
 # For convenience, a completion reference guide is included at the bottom of
 # this file.
@@ -12,7 +12,7 @@
 # Originally based on code from the zsh-users project — see copyright notice
 # below.
 
-_rg() {
+_gg() {
   local curcontext=$curcontext no='!' descr ret=1
   local -a context line state state_descr args tmp suf
   local -A opt_args
@@ -76,7 +76,7 @@ _rg() {
     $no"--no-include-zero[don't include files with zero matches in summary]"
 
     + '(encoding)' # Encoding options
-    {-E+,--encoding=}'[specify text encoding of files to search]: :_rg_encodings'
+    {-E+,--encoding=}'[specify text encoding of files to search]: :_gg_encodings'
     $no'--no-encoding[use default text encoding]'
 
     + '(engine)' # Engine choice options
@@ -284,12 +284,12 @@ _rg() {
     $no"--no-trim[don't trim ASCII whitespace prefix from each line]"
 
     + type # Type options
-    '*'{-t+,--type=}'[only search files matching specified type]: :_rg_types'
+    '*'{-t+,--type=}'[only search files matching specified type]: :_gg_types'
     '*--type-add=[add new glob for specified file type]: :->typespec'
-    '*--type-clear=[clear globs previously defined for specified file type]: :_rg_types'
+    '*--type-clear=[clear globs previously defined for specified file type]: :_gg_types'
     # This should actually be exclusive with everything but other type options
     '(: *)--type-list[show all supported file types and their associated globs]'
-    '*'{-T+,--type-not=}"[don't search files matching specified file type]: :_rg_types"
+    '*'{-T+,--type-not=}"[don't search files matching specified file type]: :_gg_types"
 
     + '(word-line)' # Whole-word/line match options
     {-w,--word-regexp}'[only show matches surrounded by word boundaries]'
@@ -319,7 +319,7 @@ _rg() {
     '--field-context-separator[set string to delimit fields in context lines]'
     '--field-match-separator[set string to delimit fields in matching lines]'
     '--hostname-bin=[executable for getting system hostname]:hostname executable:_command_names -e'
-    '--hyperlink-format=[specify pattern for hyperlinks]: :_rg_hyperlink_formats'
+    '--hyperlink-format=[specify pattern for hyperlinks]: :_gg_hyperlink_formats'
     '--trace[show more verbose debug messages]'
     '--dfa-size-limit=[specify upper size limit of generated DFA]:DFA size (bytes)'
     "(1 stats)--files[show each file that would be searched (but don't search)]"
@@ -394,14 +394,14 @@ _rg() {
 
     typespec)
       if compset -P '[^:]##:include:'; then
-        _sequence -s , _rg_types && ret=0
+        _sequence -s , _gg_types && ret=0
       # @todo This bit in particular could be better, but it's a little
       # complex, and attempting to solve it seems to run us up against a crash
       # bug — zsh # 40362
       elif compset -P '[^:]##:'; then
         _message 'glob or include directive' && ret=1
       elif [[ ! -prefix *:* ]]; then
-        _rg_types -qS : && ret=0
+        _gg_types -qS : && ret=0
       fi
       ;;
   esac
@@ -410,8 +410,8 @@ _rg() {
 }
 
 # Complete encodings
-(( $+functions[_rg_encodings] )) ||
-_rg_encodings() {
+(( $+functions[_gg_encodings] )) ||
+_gg_encodings() {
   local -a expl
   local -aU _encodings
 
@@ -423,8 +423,8 @@ _rg_encodings() {
 }
 
 # Complete file types
-(( $+functions[_rg_types] )) ||
-_rg_types() {
+(( $+functions[_gg_types] )) ||
+_gg_types() {
   local -a expl
   local -aU _types
 
@@ -438,16 +438,16 @@ _rg_types() {
 }
 
 # Complete hyperlink format-string aliases
-(( $+functions[_rg_hyperlink_format_aliases] )) ||
-_rg_hyperlink_format_aliases() {
+(( $+functions[_gg_hyperlink_format_aliases] )) ||
+_gg_hyperlink_format_aliases() {
   _describe -t format-aliases 'hyperlink format alias' '(
 !HYPERLINK_ALIASES!
   )'
 }
 
 # Complete custom hyperlink format strings
-(( $+functions[_rg_hyperlink_format_strings] )) ||
-_rg_hyperlink_format_strings() {
+(( $+functions[_gg_hyperlink_format_strings] )) ||
+_gg_hyperlink_format_strings() {
   local op='{' ed='}'
   local -a pfx sfx rmv
 
@@ -473,21 +473,21 @@ _rg_hyperlink_format_strings() {
 }
 
 # Complete hyperlink formats
-(( $+functions[_rg_hyperlink_formats] )) ||
-_rg_hyperlink_formats() {
+(( $+functions[_gg_hyperlink_formats] )) ||
+_gg_hyperlink_formats() {
   _alternative \
-    'format-string-aliases: :_rg_hyperlink_format_aliases' \
-    'format-strings: :_rg_hyperlink_format_strings'
+    'format-string-aliases: :_gg_hyperlink_format_aliases' \
+    'format-strings: :_gg_hyperlink_format_strings'
 }
 
 # Don't run the completion function when being sourced by itself.
 #
 # See https://github.com/BurntSushi/ripgrep/issues/2956
 # See https://github.com/BurntSushi/ripgrep/pull/2957
-if [[ $funcstack[1] == _rg ]] || (( ! $+functions[compdef] )); then
-  _rg "$@"
+if [[ $funcstack[1] == _gg ]] || (( ! $+functions[compdef] )); then
+  _gg "$@"
 else
-  compdef _rg rg
+  compdef _gg gg
 fi
 
 ################################################################################
@@ -507,7 +507,7 @@ fi
 #
 # Most zsh completion functions are defined in terms of `_arguments`, which is a
 # shell function that takes a series of argument specifications. The specs for
-# `rg` are stored in an array, which is common for more complex functions; the
+# `gg` are stored in an array, which is common for more complex functions; the
 # elements of the array are passed to `_arguments` on invocation.
 #
 # ARGUMENT-SPECIFICATION SYNTAX

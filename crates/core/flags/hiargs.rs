@@ -64,6 +64,7 @@ pub(crate) struct HiArgs {
     invert_match: bool,
     is_terminal_stdout: bool,
     line_number: bool,
+    search_line_number: bool,
     max_columns: Option<u64>,
     max_columns_preview: bool,
     max_count: Option<u64>,
@@ -218,6 +219,8 @@ impl HiArgs {
                 }
             }
         });
+        let search_line_number = line_number
+            || matches!(low.mode, Mode::Search(SearchMode::Standard));
 
         let mmap_choice = {
             // SAFETY: Memory maps are difficult to impossible to encapsulate
@@ -281,6 +284,7 @@ impl HiArgs {
             invert_match: low.invert_match,
             is_terminal_stdout: state.is_terminal_stdout,
             line_number,
+            search_line_number,
             max_columns: low.max_columns,
             max_columns_preview: low.max_columns_preview,
             max_count: low.max_count,
@@ -616,6 +620,7 @@ impl HiArgs {
             .column(self.column)
             .heading(self.heading)
             .hyperlink(self.hyperlink_config.clone())
+            .line_number(self.line_number)
             .max_columns_preview(self.max_columns_preview)
             .max_columns(self.max_columns)
             .only_matching(self.only_matching)
@@ -702,6 +707,7 @@ impl HiArgs {
             .preprocessor(self.pre.clone())?
             .preprocessor_globs(self.pre_globs.clone())
             .search_zip(self.search_zip)
+            .cwd(self.cwd.clone())
             .binary_detection_explicit(self.binary.explicit.clone())
             .binary_detection_implicit(self.binary.implicit.clone());
         Ok(builder.build(matcher, searcher, printer))
@@ -721,7 +727,7 @@ impl HiArgs {
             .max_matches(self.max_count)
             .line_terminator(line_term)
             .invert_match(self.invert_match)
-            .line_number(self.line_number)
+            .line_number(self.search_line_number)
             .multi_line(self.multiline)
             .memory_map(self.mmap_choice.clone())
             .stop_on_nonmatch(self.stop_on_nonmatch);

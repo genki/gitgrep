@@ -402,7 +402,7 @@ rgtest!(r428_unrecognized_style, |dir: Dir, mut cmd: TestCommand| {
     let output = cmd.raw_output();
     let stderr = String::from_utf8_lossy(&output.stderr);
     let expected = "\
-rg: error parsing flag --colors: \
+gg: error parsing flag --colors: \
 unrecognized style attribute ''. Choose from: nobold, bold, nointense, \
 intense, nounderline, underline, noitalic, italic.
 ";

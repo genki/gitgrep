@@ -18,8 +18,8 @@
 * [How do I make the `-f/--file` flag faster?](#dfa-size)
 * [How do I make the output look like The Silver Searcher's output?](#silver-searcher-output)
 * [Why does ripgrep get slower when I enabled PCRE2 regexes?](#pcre2-slow)
-* [When I run `rg`, why does it execute some other command?](#rg-other-cmd)
-* [How do I create an alias for ripgrep on Windows?](#rg-alias-windows)
+* [When I run `gg`, why does it execute some other command?](#gg-other-cmd)
+* [How do I create an alias for ripgrep on Windows?](#gg-alias-windows)
 * [How do I create a PowerShell profile?](#powershell-profile)
 * [How do I pipe non-ASCII content to ripgrep on Windows?](#pipe-non-ascii-windows)
 * [How can I search and replace with ripgrep?](#search-and-replace)
@@ -63,26 +63,26 @@ Does ripgrep have a man page?
 
 Yes. If you installed ripgrep through a package manager on a Unix system, then
 it would have ideally been installed for you in the proper location. In which
-case, `man rg` should just work.
+case, `man gg` should just work.
 
 Otherwise, you can ask ripgrep to generate the man page:
 
 ```
 $ mkdir -p man/man1
-$ rg --generate man > man/man1/rg.1
-$ MANPATH="$PWD/man" man rg
+$ gg --generate man > man/man1/gg.1
+$ MANPATH="$PWD/man" man gg
 ```
 
 Or, if your version of `man` supports the `-l/--local-file` flag, then this
 will suffice:
 
 ```
-$ rg --generate man | man -l -
+$ gg --generate man | man -l -
 ```
 
 Note that the man page's documentation for options is equivalent to the output
-shown in `rg --help`. To see more condensed documentation (one line per flag),
-run `rg -h`.
+shown in `gg --help`. To see more condensed documentation (one line per flag),
+run `gg -h`.
 
 The man page is also included in all
 [ripgrep binary releases](https://github.com/BurntSushi/ripgrep/releases).
@@ -102,7 +102,7 @@ For **bash**:
 ```
 $ dir="$XDG_CONFIG_HOME/bash_completion"
 $ mkdir -p "$dir"
-$ rg --generate complete-bash > "$dir/rg.bash"
+$ gg --generate complete-bash > "$dir/gg.bash"
 ```
 
 For **fish**:
@@ -110,7 +110,7 @@ For **fish**:
 ```
 $ dir="$XDG_CONFIG_HOME/fish/completions"
 $ mkdir -p "$dir"
-$ rg --generate complete-fish > "$dir/rg.fish"
+$ gg --generate complete-fish > "$dir/gg.fish"
 ```
 
 For **zsh**, the recommended approach is:
@@ -118,7 +118,7 @@ For **zsh**, the recommended approach is:
 ```zsh
 $ dir="$HOME/.zsh-complete"
 $ mkdir -p "$dir"
-$ rg --generate complete-zsh > "$dir/_rg"
+$ gg --generate complete-zsh > "$dir/_gg"
 ```
 
 And then add `$HOME/.zsh-complete` to your `fpath` in, e.g., your
@@ -132,7 +132,7 @@ Or if you'd prefer to load and generate completions at the same time, you can
 add the following to your `$HOME/.zshrc` file:
 
 ```zsh
-$ source <(rg --generate complete-zsh)
+$ source <(gg --generate complete-zsh)
 ```
 
 Note though that while this approach is easier to setup, is generally slower
@@ -141,13 +141,13 @@ than the previous method, and will add more time to loading your shell prompt.
 For **PowerShell**, create the completions:
 
 ```
-$ rg --generate complete-powershell > _rg.ps1
+$ gg --generate complete-powershell > _gg.ps1
 ```
 
-And then add `. _rg.ps1` to your PowerShell
+And then add `. _gg.ps1` to your PowerShell
 [profile](https://technet.microsoft.com/en-us/library/bb613488(v=vs.85).aspx)
-(note the leading period). If the `_rg.ps1` file is not on your `PATH`, do
-`. /path/to/_rg.ps1` instead.
+(note the leading period). If the `_gg.ps1` file is not on your `PATH`, do
+`. /path/to/_gg.ps1` instead.
 
 
 <h3 name="order">
@@ -215,7 +215,7 @@ the default one based on finite state machines. You can enable PCRE2 with the
 find all palindromes:
 
 ```
-$ rg -P '(\w{10})\1'
+$ gg -P '(\w{10})\1'
 tests/misc.rs
 483:    cmd.arg("--max-filesize").arg("44444444444444444444");
 globset/src/glob.rs
@@ -226,7 +226,7 @@ If your version of ripgrep doesn't support PCRE2, then you'll get an error
 message when you try to use the `-P/--pcre2` flag:
 
 ```
-$ rg -P '(\w{10})\1'
+$ gg -P '(\w{10})\1'
 PCRE2 is not available in this build of ripgrep
 ```
 
@@ -289,7 +289,7 @@ Here's an example that highlights the matches with a nice blue background with
 bolded white text:
 
 ```
-$ rg somepattern \
+$ gg somepattern \
     --colors 'match:none' \
     --colors 'match:bg:0x33,0x66,0xFF' \
     --colors 'match:fg:white' \
@@ -318,13 +318,13 @@ true colors should work out of the box with one caveat: you might need to
 clear ripgrep's default color settings first. That is, instead of this:
 
 ```
-$ rg somepattern --colors 'match:fg:0x33,0x66,0xFF'
+$ gg somepattern --colors 'match:fg:0x33,0x66,0xFF'
 ```
 
 you should do this
 
 ```
-$ rg somepattern --colors 'match:none' --colors 'match:fg:0x33,0x66,0xFF'
+$ gg somepattern --colors 'match:none' --colors 'match:fg:0x33,0x66,0xFF'
 ```
 
 This is because ripgrep might set the default style for `match` to `bold`, and
@@ -365,16 +365,16 @@ Why does using a leading `/` on Windows fail?
 
 If you're using cygwin on Windows and try to search for a pattern beginning
 with a `/`, then it's possible that cygwin is mangling that pattern without
-your knowledge. For example, if you tried running `rg /foo` in a cygwin shell
+your knowledge. For example, if you tried running `gg /foo` in a cygwin shell
 on Windows, then cygwin might mistakenly perform path translation on `/foo`,
-which would result in `rg C:/msys64/foo` being searched instead.
+which would result in `gg C:/msys64/foo` being searched instead.
 
 You can fix this in one of three ways:
 
 1. Stop using cygwin.
-2. Escape the leading slash with an additional slash. e.g., `rg //foo`.
+2. Escape the leading slash with an additional slash. e.g., `gg //foo`.
 3. Temporarily disable path translation by setting `MSYS_NO_PATHCONV=1`. e.g.,
-   `MSYS_NO_PATHCONV=1 rg /foo`.
+   `MSYS_NO_PATHCONV=1 gg /foo`.
 
 For more details, see https://github.com/BurntSushi/ripgrep/issues/1277
 
@@ -388,7 +388,7 @@ smaller patterns), then it is possible that it will fail to compile because it
 hit a pre-set limit. For example:
 
 ```
-$ rg '\pL{1000}'
+$ gg '\pL{1000}'
 Compiled regex exceeds size limit of 10485760 bytes.
 ```
 
@@ -398,7 +398,7 @@ all Unicode letters, which is quite large. *And* it's repeated 1000 times.)
 In this case, you can work around by simply increasing the limit:
 
 ```
-$ rg '\pL{1000}' --regex-size-limit 1G
+$ gg '\pL{1000}' --regex-size-limit 1G
 ```
 
 Increasing the limit to 1GB does not necessarily mean that ripgrep will use
@@ -431,7 +431,7 @@ How do I make the output look like The Silver Searcher's output?
 Use the `--colors` flag, like so:
 
 ```
-rg --colors line:fg:yellow      \
+gg --colors line:fg:yellow      \
    --colors line:style:bold     \
    --colors path:fg:green       \
    --colors path:style:bold     \
@@ -454,7 +454,7 @@ $ cat $HOME/.config/ripgrep/rc
 --colors=match:fg:black
 --colors=match:bg:yellow
 --colors=match:style:nobold
-$ RIPGREP_CONFIG_PATH=$HOME/.config/ripgrep/rc rg foo
+$ RIPGREP_CONFIG_PATH=$HOME/.config/ripgrep/rc gg foo
 ```
 
 
@@ -502,7 +502,7 @@ cases, a simple removal is not so easy. For example, ripgrep will return an
 error when your pattern includes a `\n` literal:
 
 ```
-$ rg '\n'
+$ gg '\n'
 the literal '"\n"' is not allowed in a regex
 ```
 
@@ -562,14 +562,14 @@ let's consider the default search using ripgrep's default regex engine and
 then the same search with PCRE2:
 
 ```
-$ time rg '^\w{42}$' subtitles2016-sample
+$ time gg '^\w{42}$' subtitles2016-sample
 21225780:EverymajordevelopmentinthehistoryofAmerica
 
 real    0m1.783s
 user    0m1.731s
 sys     0m0.051s
 
-$ time rg -P '^\w{42}$' subtitles2016-sample
+$ time gg -P '^\w{42}$' subtitles2016-sample
 21225780:EverymajordevelopmentinthehistoryofAmerica
 
 real    0m2.458s
@@ -584,14 +584,14 @@ line by line, but the second one will. We can observe which strategy ripgrep
 uses by passing the `--trace` flag:
 
 ```
-$ rg '^\w{42}$' subtitles2016-sample --trace
+$ gg '^\w{42}$' subtitles2016-sample --trace
 [... snip ...]
 TRACE|grep_searcher::searcher|grep-searcher/src/searcher/mod.rs:622: Some("subtitles2016-sample"): searching via memory map
 TRACE|grep_searcher::searcher|grep-searcher/src/searcher/mod.rs:712: slice reader: searching via slice-by-line strategy
 TRACE|grep_searcher::searcher::core|grep-searcher/src/searcher/core.rs:61: searcher core: will use fast line searcher
 [... snip ...]
 
-$ rg -P '^\w{42}$' subtitles2016-sample --trace
+$ gg -P '^\w{42}$' subtitles2016-sample --trace
 [... snip ...]
 TRACE|grep_searcher::searcher|grep-searcher/src/searcher/mod.rs:622: Some("subtitles2016-sample"): searching via memory map
 TRACE|grep_searcher::searcher|grep-searcher/src/searcher/mod.rs:705: slice reader: needs transcoding, using generic reader
@@ -613,7 +613,7 @@ but will enable PCRE2's own UTF-8 validity checking. Unfortunately, it's slower
 in my build of ripgrep:
 
 ```
-$ time rg -P '^\w{42}$' subtitles2016-sample --no-encoding
+$ time gg -P '^\w{42}$' subtitles2016-sample --no-encoding
 21225780:EverymajordevelopmentinthehistoryofAmerica
 
 real    0m3.074s
@@ -640,13 +640,13 @@ foobar
 $ xxd invalid-utf8
 00000000: 666f 6fff 6261 720a                      foo.bar.
 
-$ rg foo invalid-utf8
+$ gg foo invalid-utf8
 1:foobar
 
-$ rg -P foo invalid-utf8
+$ gg -P foo invalid-utf8
 1:foo�bar
 
-$ rg -P foo invalid-utf8 --no-encoding
+$ gg -P foo invalid-utf8 --no-encoding
 invalid-utf8: PCRE2: error matching: UTF-8 error: illegal byte (0xfe or 0xff)
 ```
 
@@ -656,14 +656,14 @@ particular pattern can't match across multiple lines anyway, so we'll still get
 the results we want. Let's try it:
 
 ```
-$ time rg -U '^\w{42}$' subtitles2016-sample
+$ time gg -U '^\w{42}$' subtitles2016-sample
 21225780:EverymajordevelopmentinthehistoryofAmerica
 
 real    0m1.803s
 user    0m1.748s
 sys     0m0.054s
 
-$ time rg -P -U '^\w{42}$' subtitles2016-sample
+$ time gg -P -U '^\w{42}$' subtitles2016-sample
 21225780:EverymajordevelopmentinthehistoryofAmerica
 
 real    0m2.962s
@@ -687,20 +687,20 @@ searching it, ripgrep winds up reading the entire contents of the file on to
 the heap before executing a search. Owch.
 
 OK, so Unicode is killing us here. The file we're searching is _mostly_ ASCII,
-so maybe we're OK with missing some data. (Try `rg '[\w--\p{ascii}]'` to see
+so maybe we're OK with missing some data. (Try `gg '[\w--\p{ascii}]'` to see
 non-ASCII word characters that an ASCII-only `\w` character class would miss.)
 We can disable Unicode in both searches, but this is done differently depending
 on the regex engine we use:
 
 ```
-$ time rg '(?-u)^\w{42}$' subtitles2016-sample
+$ time gg '(?-u)^\w{42}$' subtitles2016-sample
 21225780:EverymajordevelopmentinthehistoryofAmerica
 
 real    0m1.714s
 user    0m1.669s
 sys     0m0.044s
 
-$ time rg -P '^\w{42}$' subtitles2016-sample --no-pcre2-unicode
+$ time gg -P '^\w{42}$' subtitles2016-sample --no-pcre2-unicode
 21225780:EverymajordevelopmentinthehistoryofAmerica
 
 real    0m1.997s
@@ -719,14 +719,14 @@ of the slow line-by-line searcher by enabling multiline mode, and let's stop
 UTF-8 decoding by disabling Unicode support:
 
 ```
-$ time rg -U '(?-u)^\w{42}$' subtitles2016-sample
+$ time gg -U '(?-u)^\w{42}$' subtitles2016-sample
 21225780:EverymajordevelopmentinthehistoryofAmerica
 
 real    0m1.714s
 user    0m1.655s
 sys     0m0.058s
 
-$ time rg -P -U '^\w{42}$' subtitles2016-sample --no-pcre2-unicode
+$ time gg -P -U '^\w{42}$' subtitles2016-sample --no-pcre2-unicode
 21225780:EverymajordevelopmentinthehistoryofAmerica
 
 real    0m1.121s
@@ -753,33 +753,33 @@ improve performance that the author missed. Similarly, there may be alternative
 designs for a searching tool that are more amenable to how PCRE2 works.
 
 
-<h3 name="rg-other-cmd">
-When I run <code>rg</code>, why does it execute some other command?
+<h3 name="gg-other-cmd">
+When I run <code>gg</code>, why does it execute some other command?
 </h3>
 
-It's likely that you have a shell alias or even another tool called `rg` which
-is interfering with ripgrep. Run `which rg` to see what it is.
+It's likely that you have a shell alias or even another tool called `gg` which
+is interfering with ripgrep. Run `which gg` to see what it is.
 
 (Notably, the Rails plug-in for
 [Oh My Zsh](https://github.com/robbyrussell/oh-my-zsh/wiki/Plugins#rails) sets
-up an `rg` alias for `rails generate`.)
+up an `gg` alias for `rails generate`.)
 
 Problems like this can be resolved in one of several ways:
 
 * If you're using the OMZ Rails plug-in, disable it by editing the `plugins`
   array in your zsh configuration.
-* Temporarily bypass an existing `rg` alias by calling ripgrep as
-  `command rg`, `\rg`, or `'rg'`.
-* Temporarily bypass an existing alias or another tool named `rg` by calling
-  ripgrep by its full path (e.g., `/usr/bin/rg` or `/usr/local/bin/rg`).
-* Permanently disable an existing `rg` alias by adding `unalias rg` to the
+* Temporarily bypass an existing `gg` alias by calling ripgrep as
+  `command gg`, `\gg`, or `'gg'`.
+* Temporarily bypass an existing alias or another tool named `gg` by calling
+  ripgrep by its full path (e.g., `/usr/bin/gg` or `/usr/local/bin/gg`).
+* Permanently disable an existing `gg` alias by adding `unalias gg` to the
   bottom of your shell configuration file (e.g., `.bash_profile` or `.zshrc`).
 * Give ripgrep its own alias that doesn't conflict with other tools/aliases by
   adding a line like the following to the bottom of your shell configuration
-  file: `alias ripgrep='command rg'`.
+  file: `alias ripgrep='command gg'`.
 
 
-<h3 name="rg-alias-windows">
+<h3 name="gg-alias-windows">
 How do I create an alias for ripgrep on Windows?
 </h3>
 
@@ -787,7 +787,7 @@ Often you can find a need to make alias for commands you use a lot that set
 certain flags. But PowerShell function aliases do not behave like your typical
 linux shell alias. You always need to propagate arguments and `stdin` input.
 But it cannot be done simply as
-`function grep() { $input | rg.exe --hidden $args }`
+`function grep() { $input | gg.exe --hidden $args }`
 
 Use below example as reference to how setup alias in PowerShell.
 
@@ -797,10 +797,10 @@ function grep {
     $input.Reset()
 
     if ($count) {
-        $input | rg.exe --hidden $args
+        $input | gg.exe --hidden $args
     }
     else {
-        rg.exe --hidden $args
+        gg.exe --hidden $args
     }
 }
 ```
@@ -811,7 +811,7 @@ PowerShell special variables:
 * args - is array of arguments passed to this function.
 
 This alias checks whether there is `stdin` input and propagates only if there
-is some lines. Otherwise empty `$input` will make powershell to trigger `rg` to
+is some lines. Otherwise empty `$input` will make powershell to trigger `gg` to
 search empty `stdin`.
 
 
@@ -871,7 +871,7 @@ and a substitution command to search and replace in the specified file.
 Files containing matching patterns can be provided to sed using
 
 ```
-rg foo --files-with-matches
+gg foo --files-with-matches
 ```
 
 The output of this command is a list of filenames that contain a match for
@@ -882,7 +882,7 @@ standard input into arguments for the command following xargs. You can use this
 combination to pipe a list of filenames into sed for replacement. For example:
 
 ```
-rg foo --files-with-matches | xargs sed -i 's/foo/bar/g'
+gg foo --files-with-matches | xargs sed -i 's/foo/bar/g'
 ```
 
 will replace all instances of 'foo' with 'bar' in the files in which
@@ -896,7 +896,7 @@ BSD sed (the default on macOS and FreeBSD) then you must modify the above
 command to be the following:
 
 ```
-rg foo --files-with-matches | xargs sed -i '' 's/foo/bar/g'
+gg foo --files-with-matches | xargs sed -i '' 's/foo/bar/g'
 ```
 
 The `-i` flag in BSD sed requires a file extension to be given to make backups
@@ -909,7 +909,7 @@ ripgrep to output NUL bytes between each path, and telling xargs to read paths
 delimited by NUL bytes:
 
 ```
-rg foo --files-with-matches -0 | xargs -0 sed -i 's/foo/bar/g'
+gg foo --files-with-matches -0 | xargs -0 sed -i 's/foo/bar/g'
 ```
 
 To learn more about sed, see the sed manual

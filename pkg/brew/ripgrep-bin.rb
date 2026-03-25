@@ -14,10 +14,10 @@ class RipgrepBin < Formula
   conflicts_with "ripgrep"
 
   def install
-    bin.install "rg"
-    man1.install "doc/rg.1"
+    bin.install "gg"
+    man1.install "doc/gg.1"
 
-    bash_completion.install "complete/rg.bash"
-    zsh_completion.install "complete/_rg"
+    bash_completion.install "complete/gg.bash"
+    zsh_completion.install "complete/_gg"
   end
 end

@@ -1,9 +1,9 @@
-ripgrep (rg)
+ripgrep (gg)
 ------------
 ripgrep is a line-oriented search tool that recursively searches the current
 directory for a regex pattern. By default, ripgrep will respect gitignore rules
 and automatically skip hidden files/directories and binary files. (To disable
-all automatic filtering by default, use `rg -uuu`.) ripgrep has first class
+all automatic filtering by default, use `gg -uuu`.) ripgrep has first class
 support on Windows, macOS and Linux, with binary downloads available for [every
 release](https://github.com/BurntSushi/ripgrep/releases). ripgrep is similar to
 other popular search tools like The Silver Searcher, ack and grep.
@@ -50,7 +50,7 @@ for a very detailed comparison with more benchmarks and analysis.
 
 | Tool | Command | Line count | Time |
 | ---- | ------- | ---------- | ---- |
-| ripgrep (Unicode) | `rg -n -w '[A-Z]+_SUSPEND'` | 536 | **0.082s** (1.00x) |
+| ripgrep (Unicode) | `gg -n -w '[A-Z]+_SUSPEND'` | 536 | **0.082s** (1.00x) |
 | [hypergrep](https://github.com/p-ranav/hypergrep) | `hgrep -n -w '[A-Z]+_SUSPEND'` | 536 | 0.167s (2.04x) |
 | [git grep](https://www.kernel.org/pub/software/scm/git/docs/git-grep.html) | `git grep -P -n -w '[A-Z]+_SUSPEND'` | 536 | 0.273s (3.34x) |
 | [The Silver Searcher](https://github.com/ggreer/the_silver_searcher) | `ag -w '[A-Z]+_SUSPEND'` | 534 | 0.443s (5.43x) |
@@ -66,7 +66,7 @@ doing equivalent work:
 
 | Tool | Command | Line count | Time |
 | ---- | ------- | ---------- | ---- |
-| ripgrep | `rg -uuu -tc -n -w '[A-Z]+_SUSPEND'` | 447 | **0.063s** (1.00x) |
+| ripgrep | `gg -uuu -tc -n -w '[A-Z]+_SUSPEND'` | 447 | **0.063s** (1.00x) |
 | [ugrep](https://github.com/Genivia/ugrep) | `ugrep -r -n --include='*.c' --include='*.h' -w '[A-Z]+_SUSPEND'` | 447 | 0.607s (9.62x) |
 | [GNU grep](https://www.gnu.org/software/grep/) | `grep -E -r -n --include='*.c' --include='*.h' -w '[A-Z]+_SUSPEND'` | 447 | 0.674s (10.69x) |
 
@@ -76,7 +76,7 @@ comparison between ripgrep, ugrep and GNU grep on a file cached in memory
 
 | Tool | Command | Line count | Time |
 | ---- | ------- | ---------- | ---- |
-| ripgrep (Unicode) | `rg -w 'Sherlock [A-Z]\w+'` | 7882 | **1.042s** (1.00x) |
+| ripgrep (Unicode) | `gg -w 'Sherlock [A-Z]\w+'` | 7882 | **1.042s** (1.00x) |
 | [ugrep](https://github.com/Genivia/ugrep) | `ugrep -w 'Sherlock [A-Z]\w+'` | 7882 | 1.339s (1.28x) |
 | [GNU grep (Unicode)](https://www.gnu.org/software/grep/) | `LC_ALL=en_US.UTF-8 egrep -w 'Sherlock [A-Z]\w+'` | 7882 | 6.577s (6.31x) |
 
@@ -88,7 +88,7 @@ Beware of performance cliffs though:
 
 | Tool | Command | Line count | Time |
 | ---- | ------- | ---------- | ---- |
-| ripgrep (Unicode) | `rg -w '[A-Z]\w+ Sherlock [A-Z]\w+'` | 485 | **1.053s** (1.00x) |
+| ripgrep (Unicode) | `gg -w '[A-Z]\w+ Sherlock [A-Z]\w+'` | 485 | **1.053s** (1.00x) |
 | [GNU grep (Unicode)](https://www.gnu.org/software/grep/) | `LC_ALL=en_US.UTF-8 grep -E -w '[A-Z]\w+ Sherlock [A-Z]\w+'` | 485 | 6.234s (5.92x) |
 | [ugrep](https://github.com/Genivia/ugrep) | `ugrep -w '[A-Z]\w+ Sherlock [A-Z]\w+'` | 485 | 28.973s (27.51x) |
 
@@ -97,7 +97,7 @@ files for patterns without any opportunities for literal optimizations:
 
 | Tool | Command | Line count | Time |
 | ---- | ------- | ---------- | ---- |
-| ripgrep | `rg '[A-Za-z]{30}'` | 6749 | **15.569s** (1.00x) |
+| ripgrep | `gg '[A-Za-z]{30}'` | 6749 | **15.569s** (1.00x) |
 | [ugrep](https://github.com/Genivia/ugrep) | `ugrep -E '[A-Za-z]{30}'` | 6749 | 21.857s (1.40x) |
 | [GNU grep](https://www.gnu.org/software/grep/) | `LC_ALL=C grep -E '[A-Za-z]{30}'` | 6749 | 32.409s (2.08x) |
 | [GNU grep (Unicode)](https://www.gnu.org/software/grep/) | `LC_ALL=en_US.UTF-8 grep -E '[A-Za-z]{30}'` | 6795 | 8m30s (32.74x) |
@@ -109,7 +109,7 @@ generally speaking):
 
 | Tool | Command | Line count | Time |
 | ---- | ------- | ---------- | ---- |
-| ripgrep | `rg the` | 83499915 | **6.948s** (1.00x) |
+| ripgrep | `gg the` | 83499915 | **6.948s** (1.00x) |
 | [ugrep](https://github.com/Genivia/ugrep) | `ugrep the` | 83499915 | 11.721s (1.69x) |
 | [GNU grep](https://www.gnu.org/software/grep/) | `LC_ALL=C grep the` | 83499915 | 15.217s (2.19x) |
 
@@ -124,9 +124,9 @@ generally speaking):
   filtering](GUIDE.md#automatic-filtering). Namely, ripgrep won't search files
   ignored by your `.gitignore`/`.ignore`/`.rgignore` files, it won't search
   hidden files and it won't search binary files. Automatic filtering can be
-  disabled with `rg -uuu`.
+  disabled with `gg -uuu`.
 * ripgrep can [search specific types of files](GUIDE.md#manual-filtering-file-types).
-  For example, `rg -tpy foo` limits your search to Python files and `rg -Tjs
+  For example, `gg -tpy foo` limits your search to Python files and `gg -Tjs
   foo` excludes JavaScript files from your search. ripgrep can be taught about
   new file types with custom matching rules.
 * ripgrep supports many features found in `grep`, such as showing the context
@@ -232,7 +232,7 @@ repo](https://github.com/nalgeon/tryxinyminutes).
 
 ### Installation
 
-The binary name for ripgrep is `rg`.
+The binary name for ripgrep is `gg`.
 
 **[Archives of precompiled binaries for ripgrep are available for Windows,
 macOS and Linux.](https://github.com/BurntSushi/ripgrep/releases)** Linux and
@@ -461,7 +461,7 @@ To build ripgrep:
 $ git clone https://github.com/BurntSushi/ripgrep
 $ cd ripgrep
 $ cargo build --release
-$ ./target/release/rg --version
+$ ./target/release/gg --version
 0.1.3
 ```
 
@@ -519,8 +519,8 @@ from the repository root.
 ### Related tools
 
 * [delta](https://github.com/dandavison/delta) is a syntax highlighting
-pager that supports the `rg --json` output format. So all you need to do to
-make it work is `rg --json pattern | delta`. See [delta's manual section on
+pager that supports the `gg --json` output format. So all you need to do to
+make it work is `gg --json pattern | delta`. See [delta's manual section on
 grep](https://dandavison.github.io/delta/grep.html) for more details.
 
 

@@ -7,7 +7,12 @@ read and matched using the regex engine) and the printer. For example, the
 search worker is where things like preprocessors or decompression happens.
 */
 
-use std::{io, path::Path};
+use std::{
+    collections::HashMap,
+    io,
+    path::{Path, PathBuf},
+    sync::Arc,
+};
 
 use {grep::matcher::Matcher, termcolor::WriteColor};
 
@@ -22,6 +27,8 @@ struct Config {
     search_zip: bool,
     binary_implicit: grep::searcher::BinaryDetection,
     binary_explicit: grep::searcher::BinaryDetection,
+    cwd: PathBuf,
+    git_bin: Option<PathBuf>,
 }
 
 impl Default for Config {
@@ -32,8 +39,17 @@ impl Default for Config {
             search_zip: false,
             binary_implicit: grep::searcher::BinaryDetection::none(),
             binary_explicit: grep::searcher::BinaryDetection::none(),
+            cwd: std::env::current_dir()
+                .unwrap_or_else(|_| PathBuf::from(".")),
+            git_bin: grep::cli::resolve_binary("git").ok(),
         }
     }
+}
+
+#[derive(Clone, Debug, Default)]
+struct GitCache {
+    repo_roots: HashMap<PathBuf, Option<PathBuf>>,
+    line_timestamps: HashMap<PathBuf, Arc<[u64]>>,
 }
 
 /// A builder for configuring and constructing a search worker.
@@ -81,6 +97,7 @@ impl SearchWorkerBuilder {
             matcher,
             searcher,
             printer,
+            git_cache: GitCache::default(),
         }
     }
 
@@ -110,6 +127,12 @@ impl SearchWorkerBuilder {
         globs: ignore::overrides::Override,
     ) -> &mut SearchWorkerBuilder {
         self.config.preprocessor_globs = globs;
+        self
+    }
+
+    /// Set the current working directory used for resolving relative paths.
+    pub(crate) fn cwd(&mut self, cwd: PathBuf) -> &mut SearchWorkerBuilder {
+        self.config.cwd = cwd;
         self
     }
 
@@ -238,6 +261,7 @@ pub(crate) struct SearchWorker<W> {
     matcher: PatternMatcher,
     searcher: grep::searcher::Searcher,
     printer: Printer<W>,
+    git_cache: GitCache,
 }
 
 impl<W: WriteColor> SearchWorker<W> {
@@ -342,11 +366,19 @@ impl<W: WriteColor> SearchWorker<W> {
     fn search_path(&mut self, path: &Path) -> io::Result<SearchResult> {
         use self::PatternMatcher::*;
 
+        let line_timestamps = match self.printer {
+            Printer::Standard(_) => self.git_line_timestamps(path),
+            _ => None,
+        };
         let (searcher, printer) = (&mut self.searcher, &mut self.printer);
         match self.matcher {
-            RustRegex(ref m) => search_path(m, searcher, printer, path),
+            RustRegex(ref m) => {
+                search_path(m, searcher, printer, path, line_timestamps)
+            }
             #[cfg(feature = "pcre2")]
-            PCRE2(ref m) => search_path(m, searcher, printer, path),
+            PCRE2(ref m) => {
+                search_path(m, searcher, printer, path, line_timestamps)
+            }
         }
     }
 
@@ -373,6 +405,87 @@ impl<W: WriteColor> SearchWorker<W> {
             PCRE2(ref m) => search_reader(m, searcher, printer, path, rdr),
         }
     }
+
+    fn git_line_timestamps(&mut self, path: &Path) -> Option<Arc<[u64]>> {
+        let git_bin = self.config.git_bin.clone()?;
+        let absolute_path = self.absolute_path(path);
+        if let Some(line_timestamps) =
+            self.git_cache.line_timestamps.get(&absolute_path)
+        {
+            return Some(line_timestamps.clone());
+        }
+        let parent = absolute_path.parent()?.to_path_buf();
+        let repo_root = match self.git_cache.repo_roots.get(&parent) {
+            Some(repo_root) => repo_root.clone(),
+            None => {
+                let repo_root = git_repo_root(&git_bin, &parent);
+                self.git_cache.repo_roots.insert(parent, repo_root.clone());
+                repo_root
+            }
+        }?;
+        let repo_relative_path =
+            absolute_path.strip_prefix(&repo_root).ok()?;
+        let line_timestamps = Arc::<[u64]>::from(git_blame_timestamps(
+            &git_bin,
+            &repo_root,
+            repo_relative_path,
+        )?);
+        self.git_cache
+            .line_timestamps
+            .insert(absolute_path, line_timestamps.clone());
+        Some(line_timestamps)
+    }
+
+    fn absolute_path(&self, path: &Path) -> PathBuf {
+        if path.is_absolute() {
+            path.to_path_buf()
+        } else {
+            self.config.cwd.join(path)
+        }
+    }
+}
+
+fn git_repo_root(git_bin: &Path, dir: &Path) -> Option<PathBuf> {
+    let output = std::process::Command::new(git_bin)
+        .arg("-C")
+        .arg(dir)
+        .args(["rev-parse", "--show-toplevel"])
+        .output()
+        .ok()?;
+    if !output.status.success() {
+        return None;
+    }
+    let root = String::from_utf8(output.stdout).ok()?;
+    Some(PathBuf::from(root.trim_end()))
+}
+
+fn git_blame_timestamps(
+    git_bin: &Path,
+    repo_root: &Path,
+    repo_relative_path: &Path,
+) -> Option<Vec<u64>> {
+    let output = std::process::Command::new(git_bin)
+        .arg("-C")
+        .arg(repo_root)
+        .args(["blame", "--line-porcelain", "--"])
+        .arg(repo_relative_path)
+        .output()
+        .ok()?;
+    if !output.status.success() {
+        return None;
+    }
+
+    let stdout = String::from_utf8(output.stdout).ok()?;
+    let mut current_timestamp = None;
+    let mut line_timestamps = vec![];
+    for line in stdout.lines() {
+        if let Some(timestamp) = line.strip_prefix("author-time ") {
+            current_timestamp = timestamp.parse::<u64>().ok();
+        } else if line.starts_with('\t') {
+            line_timestamps.push(current_timestamp?);
+        }
+    }
+    if line_timestamps.is_empty() { None } else { Some(line_timestamps) }
 }
 
 /// Search the contents of the given file path using the given matcher,
@@ -382,10 +495,15 @@ fn search_path<M: Matcher, W: WriteColor>(
     searcher: &mut grep::searcher::Searcher,
     printer: &mut Printer<W>,
     path: &Path,
+    line_timestamps: Option<Arc<[u64]>>,
 ) -> io::Result<SearchResult> {
     match *printer {
         Printer::Standard(ref mut p) => {
-            let mut sink = p.sink_with_path(&matcher, path);
+            let mut sink = p.sink_with_path_and_line_timestamps(
+                &matcher,
+                path,
+                line_timestamps,
+            );
             searcher.search_path(&matcher, path, &mut sink)?;
             Ok(SearchResult {
                 has_match: sink.has_match(),

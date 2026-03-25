@@ -177,7 +177,7 @@ impl Dir {
 
     /// Returns the path to the ripgrep executable.
     pub fn bin(&self) -> process::Command {
-        let rg = self.root.join(format!("../rg{}", env::consts::EXE_SUFFIX));
+        let rg = self.root.join(format!("../gg{}", env::consts::EXE_SUFFIX));
         match cross_runner() {
             None => process::Command::new(rg),
             Some(runner) => {

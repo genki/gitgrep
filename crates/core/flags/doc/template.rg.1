@@ -2,7 +2,7 @@
 .
 .
 .SH NAME
-rg \- recursively search the current directory for lines matching a pattern
+gg \- recursively search the current directory for lines matching a pattern
 .
 .
 .SH SYNOPSIS
@@ -28,7 +28,7 @@ rg \- recursively search the current directory for lines matching a pattern
 .
 .
 .SH DESCRIPTION
-ripgrep (rg) recursively searches the current directory for a regex pattern.
+ripgrep (gg) recursively searches the current directory for a regex pattern.
 By default, ripgrep will respect your \fB.gitignore\fP and automatically skip
 hidden files/directories and binary files.
 .sp
@@ -44,7 +44,7 @@ starting with \fB#\fP are ignored. For more details, see \fBCONFIGURATION
 FILES\fP below.
 .sp
 ripgrep will automatically detect if stdin is a readable file and search stdin
-for a regex pattern, e.g. \fBls | rg foo\fP. In some environments, stdin may
+for a regex pattern, e.g. \fBls | gg foo\fP. In some environments, stdin may
 exist when it shouldn't. To turn off stdin detection, one can explicitly
 specify the directory to search, e.g. \fBrg foo ./\fP.
 .sp
@@ -285,13 +285,13 @@ For example, if your ripgreprc file contained a single line:
 then the following command
 .sp
 .EX
-    RIPGREP_CONFIG_PATH=wherever/.ripgreprc rg foo
+    RIPGREP_CONFIG_PATH=wherever/.ripgreprc gg foo
 .EE
 .sp
 would behave identically to the following command:
 .sp
 .EX
-    rg \-\-smart-case foo
+    gg \-\-smart-case foo
 .EE
 .sp
 Another example is adding types, like so:
@@ -304,7 +304,7 @@ Another example is adding types, like so:
 The above would behave identically to the following command:
 .sp
 .EX
-    rg \-\-type\-add 'web:*.{html,css,js}*' foo
+    gg \-\-type\-add 'web:*.{html,css,js}*' foo
 .EE
 .sp
 The same applies to using globs. This:
@@ -323,7 +323,7 @@ or this:
 would behave identically to the following command:
 .sp
 .EX
-    rg \-\-glob '!.git' foo
+    gg \-\-glob '!.git' foo
 .EE
 .sp
 The bottom line is that every shell argument needs to be on its own line. So
@@ -355,13 +355,13 @@ exactly like conflicts in the same command line invocation. That is, assuming
 your config file contains only \fB\-\-smart\-case\fP, then this command:
 .sp
 .EX
-    RIPGREP_CONFIG_PATH=wherever/.ripgreprc rg foo \-\-case\-sensitive
+    RIPGREP_CONFIG_PATH=wherever/.ripgreprc gg foo \-\-case\-sensitive
 .EE
 .sp
 is exactly equivalent to
 .sp
 .EX
-    rg \-\-smart\-case foo \-\-case\-sensitive
+    gg \-\-smart\-case foo \-\-case\-sensitive
 .EE
 .sp
 in which case, the \fB\-\-case\-sensitive\fP flag would override the
@@ -377,7 +377,7 @@ For \fBbash\fP, move \fBrg.bash\fP to \fB$XDG_CONFIG_HOME/bash_completion\fP or
 .sp
 For \fBfish\fP, move \fBrg.fish\fP to \fB$HOME/.config/fish/completions\fP.
 .sp
-For \fBzsh\fP, move \fB_rg\fP to one of your \fB$fpath\fP directories.
+For \fBzsh\fP, move \fB_gg\fP to one of your \fB$fpath\fP directories.
 .
 .
 .SH CAVEATS

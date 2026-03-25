@@ -45,6 +45,7 @@ struct Config {
     replacement: Arc<Option<Vec<u8>>>,
     max_columns: Option<u64>,
     max_columns_preview: bool,
+    line_number: bool,
     column: bool,
     byte_offset: bool,
     trim_ascii: bool,
@@ -70,6 +71,7 @@ impl Default for Config {
             replacement: Arc::new(None),
             max_columns: None,
             max_columns_preview: false,
+            line_number: true,
             column: false,
             byte_offset: false,
             trim_ascii: false,
@@ -337,6 +339,12 @@ impl StandardBuilder {
         self
     }
 
+    /// Print line numbers when the searcher reports them.
+    pub fn line_number(&mut self, yes: bool) -> &mut StandardBuilder {
+        self.config.line_number = yes;
+        self
+    }
+
     /// Print the absolute byte offset of the beginning of each line printed.
     ///
     /// The absolute byte offset starts from the beginning of each search and
@@ -526,6 +534,7 @@ impl<W: WriteColor> Standard<W> {
             replacer: Replacer::new(),
             interpolator,
             path: None,
+            line_timestamps: None,
             start_time: Instant::now(),
             match_count: 0,
             binary_byte_offset: None,
@@ -547,6 +556,21 @@ impl<W: WriteColor> Standard<W> {
         M: Matcher,
         P: ?Sized + AsRef<Path>,
     {
+        self.sink_with_path_and_line_timestamps(matcher, path, None)
+    }
+
+    /// Like `sink_with_path`, but also associates per-line UNIX timestamps
+    /// with the file being searched.
+    pub fn sink_with_path_and_line_timestamps<'p, 's, M, P>(
+        &'s mut self,
+        matcher: M,
+        path: &'p P,
+        line_timestamps: Option<Arc<[u64]>>,
+    ) -> StandardSink<'p, 's, M, W>
+    where
+        M: Matcher,
+        P: ?Sized + AsRef<Path>,
+    {
         if !self.config.path {
             return self.sink(matcher);
         }
@@ -562,6 +586,7 @@ impl<W: WriteColor> Standard<W> {
             replacer: Replacer::new(),
             interpolator,
             path: Some(ppath),
+            line_timestamps,
             start_time: Instant::now(),
             match_count: 0,
             binary_byte_offset: None,
@@ -642,6 +667,7 @@ pub struct StandardSink<'p, 's, M: Matcher, W> {
     replacer: Replacer<M>,
     interpolator: hyperlink::Interpolator,
     path: Option<PrinterPath<'p>>,
+    line_timestamps: Option<Arc<[u64]>>,
     start_time: Instant,
     match_count: u64,
     binary_byte_offset: Option<u64>,
@@ -1181,6 +1207,7 @@ impl<'a, M: Matcher, W: WriteColor> StandardImpl<'a, M, W> {
     ) -> io::Result<()> {
         let mut prelude = PreludeWriter::new(self);
         prelude.start(line_number, column)?;
+        prelude.write_git_timestamp(line_number)?;
         prelude.write_path()?;
         prelude.write_line_number(line_number)?;
         prelude.write_column_number(column)?;
@@ -1547,6 +1574,16 @@ impl<'a, M: Matcher, W: WriteColor> StandardImpl<'a, M, W> {
         self.sink.path.as_ref()
     }
 
+    /// Return the Git-derived UNIX timestamp for the given line number.
+    fn git_line_timestamp(&self, line_number: Option<u64>) -> Option<u64> {
+        if self.is_context() {
+            return None;
+        }
+        let line_number = line_number?;
+        let line_index = usize::try_from(line_number.checked_sub(1)?).ok()?;
+        self.sink.line_timestamps.as_ref()?.get(line_index).copied()
+    }
+
     /// Return the appropriate field separator based on whether we are emitting
     /// matching or contextual lines.
     fn separator_field(&self) -> &[u8] {
@@ -1676,9 +1713,25 @@ impl<'a, M: Matcher, W: WriteColor> PreludeWriter<'a, M, W> {
         Ok(())
     }
 
+    /// Writes the Git-derived UNIX timestamp field if present.
+    #[inline(always)]
+    fn write_git_timestamp(&mut self, line: Option<u64>) -> io::Result<()> {
+        let Some(timestamp) = self.std.git_line_timestamp(line) else {
+            return Ok(());
+        };
+        self.write_separator()?;
+        let n = DecimalFormatter::new(timestamp);
+        self.std.write_spec(self.config().colors.line(), n.as_bytes())?;
+        self.next_separator = PreludeSeparator::FieldSeparator;
+        Ok(())
+    }
+
     /// Writes the line number field if present.
     #[inline(always)]
     fn write_line_number(&mut self, line: Option<u64>) -> io::Result<()> {
+        if !self.config().line_number {
+            return Ok(());
+        }
         let Some(line_number) = line else { return Ok(()) };
         self.write_separator()?;
         let n = DecimalFormatter::new(line_number);
